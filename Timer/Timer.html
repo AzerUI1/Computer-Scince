@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="timer.png" type="image/png">
+    <title>NEON TIMER 🔥</title>
+    <style>
+        :root {
+            --neon-blue: #08f;
+            --neon-pink: #f0f;
+            --neon-purple: #90f;
+            --dark-bg: #111;
+            --glow: 0 0 10px, 0 0 20px, 0 0 30px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><circle cx="10%" cy="15%" r="1" fill="white"/><circle cx="25%" cy="70%" r="1" fill="white"/><circle cx="50%" cy="30%" r="1.5" fill="white"/><circle cx="75%" cy="45%" r="1" fill="white"/><circle cx="90%" cy="20%" r="2" fill="white"/></svg>');
+            animation: twinkle 5s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 100, 255, 0.3);
+            border: 1px solid rgba(100, 200, 255, 0.1);
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 45%,
+                rgba(0, 150, 255, 0.1) 50%,
+                transparent 55%
+            );
+            animation: shine 3s infinite;
+            z-index: -1;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg) translateY(-100px); }
+            100% { transform: rotate(360deg) translateY(-100px); }
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--neon-blue);
+            text-shadow: 
+                0 0 10px var(--neon-blue),
+                0 0 20px var(--neon-blue),
+                0 0 30px var(--neon-blue);
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            text-align: center;
+            margin: 30px 0;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: white;
+            text-shadow: var(--glow) var(--neon-blue);
+            position: relative;
+        }
+
+        .timer-display::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            box-shadow: var(--glow) var(--neon-blue);
+            border-radius: 50%;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: none;
+            border: 2px solid var(--neon-blue);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 150, 255, 0.4), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button.secondary {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 0 25px var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        button.warning {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        button.warning:hover {
+            box-shadow: 0 0 25px var(--neon-purple);
+            color: var(--neon-purple);
+        }
+
+        #countdownInput {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--neon-blue);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            width: 80px;
+            text-align: center;
+            box-shadow: 0 0 10px var(--neon-blue);
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+
+        input[type="number"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 50, 100, 0.3);
+            border-radius: 5px;
+            margin: 30px 0;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-pink));
+            width: 100%;
+            transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .completed {
+            animation: completePulse 1s infinite alternate;
+        }
+
+        @keyframes completePulse {
+            0% { box-shadow: 0 0 10px var(--neon-blue); }
+            100% { box-shadow: 0 0 30px var(--neon-pink); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .timer-display {
+                font-size: 3rem;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            input[type="number"] {
+                width: 60px;
+                padding: 10px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="stars"></div>
+    
+    <div class="container">
+        <h1>Neon Timer</h1>
+        
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="startStopwatch()">▶ Start</button>
+            <button class="secondary" onclick="showCountdownInput()">⏱️ Countdown</button>
+            <button class="warning" onclick="resetTimer()" id="resetBtn">⏹ Reset</button>
+        </div>
+        
+        <div id="countdownInput">
+            <div class="input-group">
+                <input type="number" id="hoursInput" placeholder="H" min="0">
+                <input type="number" id="minutesInput" placeholder="M" min="0" max="59">
+                <input type="number" id="secondsInput" placeholder="S" min="0" max="59">
+            </div>
+            <button onclick="startCountdown()">🚀 Start</button>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval;
+        let totalSeconds = 0;
+        let countdownTotal = 0;
+        let isRunning = false;
+
+        // Format time as HH:MM:SS
+        function formatTime(sec) {
+            const hours = Math.floor(sec / 3600);
+            const mins = Math.floor((sec % 3600) / 60);
+            const secs = sec % 60;
+            return `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        }
+
+        // Update progress bar
+        function updateProgressBar(seconds) {
+            const progressBar = document.getElementById('progressBar');
+            if (countdownTotal > 0) {
+                const percentage = (seconds / countdownTotal) * 100;
+                progressBar.style.width = `${percentage}%`;
+                
+                // Change color as time runs out
+                if (percentage < 20) {
+                    progressBar.style.background = 'linear-gradient(to right, #ff0, #f00)';
+                } else if (percentage < 50) {
+                    progressBar.style.background = 'linear-gradient(to right, #0ff, #ff0)';
+                }
+            } else {
+                progressBar.style.width = '100%';
+                progressBar.style.background = 'linear-gradient(to right, var(--neon-blue), var(--neon-pink))';
+            }
+        }
+
+        // Start stopwatch
+        function startStopwatch() {
+            if (isRunning) return;
+            
+            clearInterval(timerInterval);
+            totalSeconds = 0;
+            countdownTotal = 0;
+            document.getElementById('timerDisplay').textContent = "00:00:00";
+            document.getElementById('timerDisplay').classList.remove('completed');
+            document.getElementById('countdownInput').style.display = 'none';
+            document.getElementById('progressBar').style.width = '100%';
+            
+            isRunning = true;
+            timerInterval = setInterval(() => {
+                totalSeconds++;
+                document.getElementById('timerDisplay').textContent = formatTime(totalSeconds);
+            }, 1000);
+        }
+
+        // Show countdown input
+        function showCountdownInput() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('countdownInput').style.display = 'block';
+            document.getElementById('timerDisplay').textContent = "00:00:00";
+            document.getElementById('timerDisplay').classList.remove('completed');
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressBar').style.background = 'linear-gradient(to right, var(--neon-blue), var(--neon-pink))';
+        }
+
+        // Start countdown
+        function startCountdown() {
+            clearInterval(timerInterval);
+            
+            const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            
+            totalSeconds = hours * 3600 + minutes * 60 + seconds;
+            countdownTotal = totalSeconds;
+            
+            if(totalSeconds <= 0) {
+                alert("Please enter a valid time!");
+                return;
+            }
+            
+            document.getElementById('countdownInput').style.display = 'none';
+            document.getElementById('timerDisplay').textContent = formatTime(totalSeconds);
+            updateProgressBar(totalSeconds);
+            
+            isRunning = true;
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                document.getElementById('timerDisplay').textContent = formatTime(totalSeconds);
+                updateProgressBar(totalSeconds);
+                
+                if(totalSeconds <= 5) {
+                    document.getElementById('timerDisplay').classList.add('completed');
+                }
+                
+                if(totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    playAlarm();
+                    isRunning = false;
+                }
+            }, 1000);
+        }
+
+        // Reset timer
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('timerDisplay').textContent = "00:00:00";
+            document.getElementById('timerDisplay').classList.remove('completed');
+            document.getElementById('countdownInput').style.display = 'none';
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressBar').style.background = 'linear-gradient(to right, var(--neon-blue), var(--neon-pink))';
+            document.getElementById('hoursInput').value = '';
+            document.getElementById('minutesInput').value = '';
+            document.getElementById('secondsInput').value = '';
+            totalSeconds = 0;
+            countdownTotal = 0;
+        }
+
+        // Play alarm sound
+        function playAlarm() {
+            const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Base64 encoded short beep
+            audio.play();
+            
+            // Visual alert
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.classList.add('completed');
+            
+            // Flash animation
+            let flashCount = 0;
+            const flashInterval = setInterval(() => {
+                timerDisplay.style.color = flashCount % 2 === 0 ? 'var(--neon-pink)' : 'white';
+                flashCount++;
+                if (flashCount > 6) {
+                    clearInterval(flashInterval);
+                    timerDisplay.style.color = 'white';
+                }
+            }, 300);
+        }
+
+        // Prevent form submission on Enter
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
