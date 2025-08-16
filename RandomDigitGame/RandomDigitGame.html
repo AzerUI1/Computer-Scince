@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+  <link rel="icon" type="image/png" href="number-blocks.png" />
+  <title>Guess the Number — Easy / Medium / Hard</title>
+  <meta name="description" content="Beautiful browser game: guess the number with difficulty levels. Pure HTML + CSS + JS in one file." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#0f1020; --bg2:#101a3a; --card:#111827cc; --border:#2a2f45; --text:#e5e7eb; --muted:#9aa0b4; --accent:#7c3aed; --accent2:#22d3ee; --success:#22c55e; --danger:#ef4444;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto; color:var(--text);
+      background: radial-gradient(1200px 800px at 20% 10%, #1b2157 0%, transparent 60%),
+                  radial-gradient(900px 600px at 90% 80%, #0b3d46 0%, transparent 60%),
+                  linear-gradient(120deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+    /* subtle animated grid */
+    .grid{
+      position:fixed; inset:0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px; opacity:.12; pointer-events:none; animation: pan 60s linear infinite;
+    }
+    @keyframes pan{0%{background-position:0 0,0 0}100%{background-position:1000px 0,0 1000px}}
+
+    .container{min-height:100%; display:grid; place-items:center; padding:32px}
+    .card{
+      position:relative; width:min(960px,92vw); border-radius:24px; background:linear-gradient(180deg, #0b102260, #0b1022a0);
+      box-shadow:0 30px 100px #0008, inset 0 1px 0 #fff2; border:1px solid var(--border);
+      overflow:hidden;
+    }
+    .card::before{content:""; position:absolute; inset: -2px; filter: blur(18px); z-index:-1;
+      background: conic-gradient(from 180deg at 50% 50%, var(--accent), var(--accent2), #34d399, #f59e0b, var(--accent)); opacity:.25;
+      animation: spin 12s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    header{display:flex; gap:14px; align-items:center; padding:24px 28px; border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff08, #0000);
+    }
+    header .logo{font-size:28px}
+    header h1{font-size:20px; margin:0; font-weight:800; letter-spacing:.2px}
+    header p{margin:2px 0 0; color:var(--muted); font-size:13px}
+
+    .content{display:grid; gap:22px; padding:28px}
+
+    .levels{display:flex; flex-wrap:wrap; gap:12px}
+    .chip{cursor:pointer; border:1px solid var(--border); padding:10px 14px; border-radius:999px; font-weight:600;
+      background:#0f172acc; transition:.2s transform, .2s background, .2s border;
+      user-select:none;
+    }
+    .chip:hover{transform:translateY(-1px); border-color:#3b3f56}
+    .chip.active{background:linear-gradient(180deg, #1a1045, #0d0e25); border-color:#5b21b6; box-shadow:inset 0 0 0 1px #7c3aed55}
+    .chip small{opacity:.7; font-weight:600}
+
+    .panel{display:grid; gap:14px; padding:18px; border:1px dashed #2a2f45; border-radius:16px; background:#0b1224cc}
+    .statrow{display:flex; flex-wrap:wrap; gap:16px; align-items:center}
+    .stat{padding:8px 12px; border:1px solid var(--border); border-radius:12px; font-size:13px; color:var(--muted)}
+
+    .io{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    input[type=number]{
+      width:160px; padding:12px 14px; border-radius:14px; border:1px solid var(--border); background:#0b1020; color:var(--text);
+      outline:none; font-size:16px; transition:.2s border,.2s box-shadow;
+    }
+    input[type=number]:focus{border-color:#37406a; box-shadow:0 0 0 6px #7c3aed22}
+    button{
+      appearance:none; border:none; padding:12px 16px; border-radius:14px; font-weight:700; letter-spacing:.2px; cursor:pointer;
+      background:linear-gradient(180deg, #6d28d9, #4c1d95); color:white; box-shadow:0 10px 30px #7c3aed33; transition:.18s transform, .18s filter, .2s opacity;
+    }
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+    button.secondary{background:linear-gradient(180deg, #0b132a, #0a0f22); color:#e2e8f0; border:1px solid #2a2f45}
+    button.ghost{background:transparent; border:1px solid #2a2f45; color:#aab3cf}
+
+    .hint{font-family:"JetBrains Mono", monospace; font-size:14px; color:#cbd5e1}
+    .hint.positive{color:var(--success)}
+    .hint.negative{color:var(--danger)}
+
+    footer{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:18px 28px; border-top:1px solid var(--border); font-size:13px; color:var(--muted)}
+
+    /* confetti canvas sits on top */
+    canvas#confetti{position:fixed; inset:0; pointer-events:none}
+
+    .badge {font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid #2a2f45; background:#0a0f22; color:#a8b5d8}
+  </style>
+</head>
+<body>
+  <div class="grid" aria-hidden="true"></div>
+  <canvas id="confetti"></canvas>
+
+  <main class="container">
+    <section class="card" role="region" aria-label="Guess the Number Game">
+      <header>
+        <div class="logo">🎯</div>
+        <div>
+          <h1>Guess the Number</h1>
+          <p>Choose difficulty, enter a number and get "higher/lower" hints.</p>
+        </div>
+      </header>
+
+      <div class="content">
+        <div>
+          <div class="badge">Step 1</div>
+          <h2 style="margin:8px 0 6px">Select level</h2>
+          <div class="levels" id="levelChips" role="tablist" aria-label="Difficulty levels">
+            <div class="chip active" data-level="1" role="tab" aria-selected="true">1. Easy <small>(1–9)</small></div>
+            <div class="chip" data-level="2" role="tab" aria-selected="false">2. Medium <small>(1–99)</small></div>
+            <div class="chip" data-level="3" role="tab" aria-selected="false">3. Hard <small>(1–999)</small></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="statrow">
+            <div class="stat">Range: <strong id="range">1–9</strong></div>
+            <div class="stat">Attempts: <strong id="tries">0</strong></div>
+            <div class="stat">Status: <strong id="status">Game not started</strong></div>
+          </div>
+
+          <div class="io">
+            <label for="guess" class="sr-only">Your number</label>
+            <input id="guess" type="number" inputmode="numeric" placeholder="Enter number" />
+            <button id="btnTry">Check</button>
+            <button id="btnNew" class="secondary">New game</button>
+            <button id="btnGiveUp" class="ghost">Give up</button>
+          </div>
+
+          <div class="hint" id="hint">Hints will appear here...</div>
+        </div>
+      </div>
+
+      <footer>
+        <div></div>
+        <div></div>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // ======== GAME STATE ========
+    const LEVELS = { 1:{min:1,max:9}, 2:{min:1,max:99}, 3:{min:1,max:999} };
+    let level = 1; let secret = 0; let tries = 0; let active = false;
+
+    const el = {
+      chips: document.getElementById('levelChips'),
+      range: document.getElementById('range'),
+      tries: document.getElementById('tries'),
+      status: document.getElementById('status'),
+      hint: document.getElementById('hint'),
+      guess: document.getElementById('guess'),
+      btnTry: document.getElementById('btnTry'),
+      btnNew: document.getElementById('btnNew'),
+      btnGiveUp: document.getElementById('btnGiveUp'),
+      confetti: document.getElementById('confetti'),
+    };
+
+    function rng(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    function setLevel(l){
+      level = l; const {min,max} = LEVELS[level];
+      el.range.textContent = `${min}–${max}`;
+      [...el.chips.querySelectorAll('.chip')].forEach(c=>{
+        c.classList.toggle('active', Number(c.dataset.level)===level);
+        c.setAttribute('aria-selected', Number(c.dataset.level)===level);
+      });
+      newGame();
+    }
+
+    function newGame(){
+      const {min,max} = LEVELS[level];
+      secret = rng(min,max); tries = 0; active = true;
+      el.tries.textContent = '0';
+      el.status.textContent = `Game in progress — guess the number`;
+      el.hint.textContent = `Enter a number from ${min} to ${max} and click "Check".`;
+      el.guess.placeholder = `from ${min} to ${max}`;
+      el.guess.min = String(min); el.guess.max = String(max);
+      el.guess.value = '';
+      el.guess.focus();
+    }
+
+    function endGame(win){
+      active = false;
+      el.status.textContent = win ? 'You won! 🎉' : 'Game over';
+      if (win) shootConfetti();
+    }
+
+    function tryGuess(){
+      if(!active){ newGame(); return; }
+      const {min,max} = LEVELS[level];
+      const value = Number(el.guess.value);
+      if (!Number.isInteger(value) || value < min || value > max){
+        el.hint.textContent = `Invalid input. Needs to be between ${min} and ${max}.`;
+        return;
+      }
+      tries++; el.tries.textContent = String(tries);
+      if (value < secret){
+        el.hint.textContent = 'Too low! Try higher →';
+        el.hint.className = 'hint negative';
+      } else if (value > secret){
+        el.hint.textContent = 'Too high! Try lower ←';
+        el.hint.className = 'hint negative';
+      } else {
+        el.hint.textContent = `Exactly! The number was ${secret}. Attempts: ${tries}.`;
+        el.hint.className = 'hint positive';
+        endGame(true);
+      }
+      el.guess.select();
+    }
+
+    // ——— events ———
+    el.chips.addEventListener('click', (e)=>{
+      const c = e.target.closest('.chip'); if(!c) return; setLevel(Number(c.dataset.level));
+    });
+    el.btnTry.addEventListener('click', tryGuess);
+    el.btnNew.addEventListener('click', newGame);
+    el.btnGiveUp.addEventListener('click', ()=>{
+      if(!active){ newGame(); return; }
+      el.hint.textContent = `The secret number was: ${secret}. Start again!`;
+      endGame(false);
+    });
+    el.guess.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter') { tryGuess(); }
+    });
+
+    // start
+    setLevel(1);
+
+    // ======== CONFETTI (tiny, dependency‑free) ========
+    const ctx = el.confetti.getContext('2d');
+    let confettiPieces = []; let confettiT = 0; let rafId = 0;
+    function shootConfetti(){
+      const {width, height} = (el.confetti);
+      el.confetti.width = innerWidth; el.confetti.height = innerHeight;
+      confettiPieces = Array.from({length: 120}, ()=>({
+        x: Math.random()*innerWidth,
+        y: -20 - Math.random()*80,
+        r: 4 + Math.random()*4,
+        vx: -1 + Math.random()*2,
+        vy: 2 + Math.random()*3,
+        rot: Math.random()*Math.PI,
+        vr: -0.2 + Math.random()*0.4,
+        a: 0.9+Math.random()*0.1
+      }));
+      confettiT = 0;
+      cancelAnimationFrame(rafId);
+      animate();
+    }
+    function animate(){
+      confettiT += 1; ctx.clearRect(0,0,innerWidth,innerHeight);
+      for(const p of confettiPieces){
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.02; // gravity
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+        ctx.globalAlpha = p.a * Math.max(0, 1 - (p.y/innerHeight));
+        // rectangles & circles mix
+        if (Math.random() < 0.5){
+          ctx.fillStyle = `hsl(${(p.x+p.y)%360}, 90%, 60%)`;
+          ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
+        } else {
+          ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fillStyle = `hsl(${(p.x*2)%360}, 90%, 60%)`; ctx.fill();
+        }
+        ctx.restore();
+      }
+      if (confettiT < 600) rafId = requestAnimationFrame(animate);
+    }
+    addEventListener('resize', ()=>{ el.confetti.width = innerWidth; el.confetti.height = innerHeight; });
+  </script>
+</body>
+</html>
