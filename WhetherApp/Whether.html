@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherScope | Modern Weather App</title>
+
+
+  <link rel="icon" href="logo.png" type="image/png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+  <link rel="stylesheet" href="Whether.css">
+</head>
+<body>
+  <script src="Whether..js" defer></script>
+  <div class="container">
+    <header>
+      <h1>WeatherScope</h1>
+      <p class="tagline">Get accurate weather forecasts for any location</p>
+    </header>
+
+    <div class="search-container">
+      <div class="search-box">
+        <input type="text" id="city" placeholder="Enter city name">
+        <button id="btn"><i class="fas fa-search"></i> Get Weather</button>
+      </div>
+    </div>
+
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading weather data...</p>
+    </div>
+
+    <div class="error-message" id="error"></div>
+
+    <div class="weather-card" id="weather">
+      <div class="weather-icon">
+        <i class="fas fa-sun"></i>
+      </div>
+      <h2 class="city-name">Search for a city</h2>
+      <div class="current-temp">--°C</div>
+      <p class="weather-desc">Enter a city name to get started</p>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-value" id="humidity">--%</div>
+          <div class="detail-label">Humidity</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="wind">-- m/s</div>
+          <div class="detail-label">Wind Speed</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="feels-like">--°C</div>
+          <div class="detail-label">Feels Like</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="pressure">-- hPa</div>
+          <div class="detail-label">Pressure</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disqus-section">
+      <h3 class="disqus-title">Weather Discussions</h3>
+      <div class="disqus-placeholder">
+        <i class="fas fa-comments"></i>
+        <p>Weather discussion forum would be integrated here with Disqus</p>
+        <p>To implement: Register at disqus.com, get your shortname, and add the universal code</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>WeatherScope © 2023 | Modern Weather Application</p>
+  </footer>
+
+  <!-- Подключение JS -->
+  <script src="script.js"></script>
+</body>
+</html>
+
